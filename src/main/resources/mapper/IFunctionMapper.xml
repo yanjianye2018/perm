@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.IFunctionMapper">
+	<resultMap id="BaseResultMap" type="com.demo.entity.Function">
+
+		<id column="func_id" jdbcType="INTEGER" property="funcId" />
+		<result column="func_name" jdbcType="VARCHAR" property="funcName" />
+		<result column="func_url" jdbcType="VARCHAR" property="funcUrl" />
+		<result column="func_code" jdbcType="VARCHAR" property="funcCode" />
+		<result column="parent_id" jdbcType="INTEGER" property="parentId" />
+		<result column="func_type" jdbcType="INTEGER" property="funcType" />
+		<result column="status" jdbcType="INTEGER" property="status" />
+		<result column="sort_num" jdbcType="INTEGER" property="sortNum" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+	</resultMap>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+
+		delete from
+		tb_functions
+		where func_id = #{funcId,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.demo.entity.Function">
+
+		insert into tb_functions
+		(func_id, func_name, func_url,
+		func_code, parent_id, func_type,
+		status,
+		sort_num, create_time,
+		update_time)
+		values (#{funcId,jdbcType=INTEGER},
+		#{funcName,jdbcType=VARCHAR},
+		#{funcUrl,jdbcType=VARCHAR},
+		#{funcCode,jdbcType=VARCHAR}, #{parentId,jdbcType=INTEGER},
+		#{funcType,jdbcType=INTEGER},
+		#{status,jdbcType=INTEGER},
+		#{sortNum,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP})
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.demo.entity.Function">
+
+		update
+		tb_functions
+		set func_name = #{funcName,jdbcType=VARCHAR},
+		func_url =
+		#{funcUrl,jdbcType=VARCHAR},
+		func_code = #{funcCode,jdbcType=VARCHAR},
+		parent_id = #{parentId,jdbcType=INTEGER},
+		func_type =
+		#{funcType,jdbcType=INTEGER},
+		status = #{status,jdbcType=INTEGER},
+		sort_num = #{sortNum,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
+		where func_id =
+		#{funcId,jdbcType=INTEGER}
+	</update>
+	<select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+		select func_id, func_name, func_url, func_code, parent_id,
+		func_type,
+		status, sort_num,
+		create_time, update_time
+		from tb_functions
+		where func_id = #{funcId,jdbcType=INTEGER}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select func_id, func_name,
+		func_url, func_code, parent_id, func_type,
+		status, sort_num,
+		create_time, update_time
+		from tb_functions where func_type = 1;
+	</select>
+	<!-- 用distinct去重 -->
+	<select id="findMenu" resultMap="BaseResultMap">
+		SELECT distinct
+		f.func_id,f.func_name,f.func_url,f.func_code,
+		f.parent_id,f.func_type,f.status,f.sort_num,
+		f.create_time,f.update_time
+		FROM tb_roles r,tb_functions f,
+		tb_role_function rf
+		WHERE r.role_id = rf.role_id AND f.func_id =
+		rf.func_id AND
+		r.role_id IN(SELECT r.role_id FROM tb_users u,tb_roles
+		r, tb_user_role ur
+		WHERE u.user_id=ur.user_id AND r.role_id =
+		ur.role_id AND u.user_id = #{userId})
+	</select>
+
+	<select id="findByFuncName" resultMap="BaseResultMap">
+		select * from tb_functions
+		where func_name = #{funcName}
+	</select>
+
+	<select id="findByParentId" resultMap="BaseResultMap">
+		select * from tb_functions where parent_id = #{parentId}
+	</select>
+	
+	<select id="findTreeByParentId" resultMap="BaseResultMap">
+		select * from tb_functions where func_type = 1 
+		<if test="parentId != null">
+			and parent_id = #{parentId}
+		</if>
+		<if test="parentId == null">
+			and parent_id is null
+		</if>
+	</select>
+</mapper>
